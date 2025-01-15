@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWAGM Financial</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        button, input {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to SWAGM Financial</h1>
+    <h2>Account Balances</h2>
+    <p><strong>Savings Account (Ananya):</strong> $<span id="savingsBalance">Loading...</span></p>
+    <p><strong>Credit Card Account (Ananya):</strong> $<span id="creditBalance">Loading...</span></p>
+    <button onclick="checkBalances()">Check Balances</button>
+
+    <h2>Deposit to Savings</h2>
+    <input type="number" id="savingsDepositAmount" placeholder="Enter amount">
+    <button onclick="depositToSavings()">Deposit</button>
+
+    <script>
+        const API_BASE = `${window.location.origin}`;
+
+        async function checkBalances() {
+            try {
+                const [savingsResponse, creditResponse] = await Promise.all([
+                    fetch(`${API_BASE}/savings/balance`),
+                    fetch(`${API_BASE}/credit/balance`),
+                ]);
+
+                document.getElementById("savingsBalance").textContent =
+                    (await savingsResponse.text()).replace("Savings Account Balance: $", "");
+                document.getElementById("creditBalance").textContent =
+                    (await creditResponse.text()).replace("Credit Card Balance: $", "");
+            } catch (error) {
+                console.error("Failed to fetch balances:", error);
+                alert("An error occurred while fetching balances. Please try again later.");
+            }
+        }
+
+        async function depositToSavings() {
+            const amount = document.getElementById("savingsDepositAmount").value;
+            try {
+                const response = await fetch(`${API_BASE}/savings/deposit?amount=${amount}`);
+                alert(await response.text());
+                checkBalances();
+            } catch (error) {
+                console.error("Failed to deposit:", error);
+            }
+        }
+
+        // Automatically check balances on page load
+        checkBalances();
+    </script>
+</body>
+</html>
+
